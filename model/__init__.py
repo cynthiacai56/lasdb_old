@@ -1,28 +1,33 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, ARRAY
-# from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, ForeignKey,Integer, Float, LargeBinary, String, ARRAY#, func
+from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
+#from geoalchemy2 import Geometry #bbox = Column(Geometry("Polygon"))
 
 Base = declarative_base()
 
-class PointCloudTable(Base):
-    __tablename__ = 'point_cloud'
+class Meta(Base):
+    __tablename__ = 'pc_metadata'
+    __table_args__ = {"schema": "lasdb"}
+    id = Column(Integer, primary_key=True)
+    version = Column(Float)
+    source_file = Column(String)
+    number_of_points = Column(Integer)
+    transform = Column(ARRAY(Float))
+    bbox = Column(ARRAY(Float))
+    #transform = Column(JSONB(none_as_null=True)) # scales, offsets
+    #bbox = Column(JSONB(none_as_null=True)) # xyz_min, xyz_max
+    #started_at = Column(TIMESTAMP, default=func.now())
+    #finished_at = Column(TIMESTAMP)
+
+
+class PointRecord(Base):
+    __tablename__ = 'pc_record'
+    __table_args__ = {"schema": "lasdb"}
 
     # Columns
-    sfc_head = Column(Integer, primary_key=True, index=True)
-    sfc_tail = Column(ARRAY(Integer), nullable = False)
+    meta_id = Column(Integer, ForeignKey(Meta.id))
+    sfc_head = Column(LargeBinary, primary_key=True, index=True)
+    sfc_tail = Column(ARRAY(LargeBinary), nullable = False)
     Z = Column(ARRAY(Float))
-    intensity = Column(ARRAY(Integer))
-    return_number = Column(ARRAY(Integer))
-    number_of_returns = Column(ARRAY(Integer))
-    scan_direction_flag= Column(ARRAY(Integer))
-    edge_of_flight_line = Column(ARRAY(Integer))
     classification = Column(ARRAY(Integer))
-    synthetic = Column(ARRAY(Integer))
-    key_point = Column(ARRAY(Integer))
-    withheld = Column(ARRAY(Integer))
-    scan_angle_rank = Column(ARRAY(Integer))
-    user_data = Column(ARRAY(Integer))
-    point_source_id = Column(ARRAY(Integer))
-    gps_time = Column(ARRAY(Integer))
-
-
+    import_meta = relationship(Meta)

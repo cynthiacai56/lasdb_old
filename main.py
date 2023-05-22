@@ -1,26 +1,32 @@
+import numpy as np
 import pandas as pd
+from pcsfc.pipeline import preprocess_las
+from db import import_data
+import time
 
-from pcsfc.pipeline import get_pc_block
-
-from sqlalchemy import create_engine
-from model import PointCloudTable
-from sqlalchemy.orm import sessionmaker
 
 def main():
-    # obtain point cloud blocks
-    filepath = "E:\Geomatics\GEO2020 Thesis\code\data\subset_yue.las"
-    split_portion = 2
-    df_block = get_pc_block(filepath, split_portion)
-    # df_block.to_csv('pc_block.csv',index=False)
+    start_time = time.time()
 
-    # Connect to database
-    engine = create_engine('postgresql://postgres:050694@localhost:5432/geo2020')
+    # 0. Parameters
+    input_path = 'E:\\Geomatics\\GEO2020 Thesis\\code\\data\\'
+    input_filename = 'jv_500m.las'
+    ratio = 0.6
+    engine_key = 'postgresql://postgres:050694@localhost:5432/lasdb3'
 
-    # Create the table
-    # PointCloudTable.metadata.create_all(engine)
+    # 1. Preprocess the data
+    meta_dict, groups = preprocess_las(input_path, input_filename, ratio)
+    print('Data is ready.')
+    print(meta_dict)
+    print(pd.DataFrame(groups, columns=['sfc_head', 'sfc_tail', 'Z', 'classification']))
 
-    # Insert data
-    df_block.to_sql('point_cloud', engine)
+    # Connect to the database and commit change
+    import_data(engine_key, meta_dict, groups)
+
+    end_time = time.time()
+    runtime = end_time - start_time
+    print("Runtime:", runtime, "seconds")
+    print('Data inserted to the database.')
 
 
 if __name__ == "__main__":

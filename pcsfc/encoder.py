@@ -1,97 +1,78 @@
 import numpy as np
 import pandas as pd
 import laspy
+from itertools import groupby
 
 
-class PointCloudLoader:
-    def __init__(self, filepath):
-        # Read data
-        las = laspy.read(filepath)
+def Expand2D(n):
+    """
+    Encodes the 64 bit morton code for a 31 bit number in the 2D space using
+    a divide and conquer approach for separating the bits.
+    1 bit is not used because the integers are not unsigned
 
-        # Colume names
-        cols = []
-        for dimension in las.point_format.dimension_names:
-            if dimension != 'X' and dimension != 'Y':
-                cols.append(dimension)
+    Args:
+        n (int): a 2D dimension
 
-                # Organizing attributes
-        self.coord = np.vstack((las.X, las.Y))
+    Returns:
+        int: 64 bit morton code in 2D
 
-        # Non-organizing attributes
-        data = np.vstack((las.Z, las.intensity, las.return_number, las.number_of_returns, las.scan_direction_flag,
-                          las.edge_of_flight_line, las.classification, las.synthetic, las.key_point, las.withheld,
-                          las.scan_angle_rank, las.user_data, las.point_source_id, las.gps_time)).transpose()
-        self.df_attr = pd.DataFrame(data, columns=cols)
+    Raises:
+        Exception: ERROR: Morton code is valid only for positive numbers
+    """
+    if n < 0:
+        raise Exception("""ERROR: Morton code is valid only for positive numbers""")
+
+    b = n & 0x7fffffff
+    b = (b ^ (b << 16)) & 0x0000ffff0000ffff
+    b = (b ^ (b << 8)) & 0x00ff00ff00ff00ff
+    b = (b ^ (b << 4)) & 0x0f0f0f0f0f0f0f0f
+    b = (b ^ (b << 2)) & 0x3333333333333333
+    b = (b ^ (b << 1)) & 0x5555555555555555
+    return b
 
 
-class PointCloudEncoder:
-    def __init__(self, coord, df_attr, split_portion):
-        # Encode SFC keys and split them in half
-        self.df_sfc = self.morton_encode(coord, split_portion)
-        self.df_points = self.df_sfc.join(df_attr)
+def EncodeMorton2D(x, y):
+    """
+    Calculates the 2D morton code from the x, y dimensions
 
-        # Group points based on SFC head
-        self.df_block = self.make_group()
+    Args:
+        x (int): the x dimension
+        y (int): the y dimension
 
-    def count_bits(self, n, base):
-        count = 0
-        while (n):
-            count += 1
-            n >>= base  # right shift operator; it requires a bitwise representation of object as first operand
-        return count
+    Returns:
+        int: 64 bit morton code in 2D
 
-    def decimal_to_binary(self, n, mbits):
-        numA = bin(n).replace("0b", "")
-        nbin = [int(x) for x in str(numA)]
-        if len(nbin) < mbits:
-            diff = mbits - len(nbin)
-            dests = [0] * diff
-            return dests + nbin
-        else:
-            return nbin
+    """
+    return bin(Expand2D(x) + (Expand2D(y) << 1))
 
-    # Key issue: where to split?
-    def morton_encode(self, coord, split_portion):
-        # Step 1: Determine dimensions and bits
-        ndims = len(coord)
-        max_coord = []
-        for i in range(ndims):
-            max_coord.append(max(coord[i]))
-        mbits = self.count_bits(max(max_coord), 1)
-        # #coord = np.vstack((las.X, las.Y, las.Z)).transpose()
-        # df_attri = pd.DataFrame(data = attri.transpose(), columns=list(las.point_format.dimension_names))
 
-        # Step 2: decimal to binary
-        df_sfc = pd.DataFrame(columns=['sfc_head', 'sfc_tail'])
-        for i in range(len(coord[0])):
-            x, y = coord[0][i], coord[1][i]
-            x_bin, y_bin = self.decimal_to_binary(x, mbits), self.decimal_to_binary(y, mbits)
+def split_string(my_string, ratio=0.5):
+    my_string = str(my_string)
+    if my_string [:2] =='0b':
+        my_string = my_string[2:len(my_string)]
+    length = len(my_string)
+    split_index = int(length * ratio)
+    head_str, tail_str = my_string[:split_index], my_string[split_index:]
+    head_bin = bytes(int(head_str[i:i+8], 2) for i in range(0, len(head_str), 8))
+    tail_bin = bytes(int(tail_str[i:i+8], 2) for i in range(0, len(tail_str), 8))
 
-            # Step 3: Combine chunks, split to head and tile
-            my_head, my_tail = str(), str()
-            for j in range(mbits // split_portion):
-                my_head = my_head + str(x_bin[j]) + str(y_bin[j])
-            for j in range(mbits // split_portion, mbits):
-                my_tail = my_tail + str(x_bin[j]) + str(y_bin[j])
+    return head_bin, tail_bin
 
-            df_sfc.loc[len(df_sfc)] = [my_head, my_tail]
 
-        return df_sfc
+def make_groups(lst):
+    # group the list by the first element of each sublist
+    sorted_list = sorted(lst, key=lambda x: x[0])
+    groups = groupby(sorted_list, lambda x: x[0])
 
-    def make_group(self):
-        # Group points using GroupBy of DataFrame
-        grouped = self.df_points.groupby('sfc_head')
+    # print the groups
+    zz = []
+    for key, group in groups:
+        group = list(group)
 
-        # Make an empty DataFrame to store
-        df_block = pd.DataFrame(columns=list(self.df_points.columns))
+        yy = [key]
+        for j in range(1, len(group[0])):
+            xx = [group[i][j] for i in range(len(group))]
+            yy.append(xx)
+        zz.append(yy)
 
-        for name, group in grouped:
-            group = group.drop(['sfc_head'], axis=1)
-
-            # Extract the attributes of each group
-            my_attr = [name]
-            for i in range(len(group.columns)):
-                my_attr.append(group[group.columns[i]].values.tolist())
-
-            df_block.loc[len(df_block)] = my_attr
-        return df_block
+    return zz
