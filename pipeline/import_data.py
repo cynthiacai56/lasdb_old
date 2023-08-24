@@ -83,6 +83,7 @@ def one_file_importer(meta_id, input_path, input_filename, ratio, engine_key):
                     one_split_keys.append([head, tail, pt[2], pt[3]])
 
                 split_keys = split_keys + one_split_keys
+                print('.')
 
     encode_time = time.time()
 
