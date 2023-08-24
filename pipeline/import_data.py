@@ -8,7 +8,7 @@ import laspy
 from db.import_data import import_data_connection
 from pcsfc.encoder import EncodeMorton2D, compute_split_length, split_bin, make_groups
 
-from time import time
+import time
 
 def get_file_names_in_directory(directory_path):
     directory_path = Path(directory_path)
@@ -57,7 +57,7 @@ def one_file_importer(meta_id, input_path, input_filename, ratio, engine_key):
     tail_length = compute_split_length(mkey_max, ratio)
     meta_dict['tail_length'] = tail_length
 
-    start_time = time.time()
+    start_time = time.time
     try:
         points = np.vstack((las.x, las.y, las.z, las.classification)).transpose()
         split_keys = []
@@ -94,10 +94,10 @@ def one_file_importer(meta_id, input_path, input_filename, ratio, engine_key):
     meta_dict['head_length'] = len(bin(pc_record_df['sfc_head'].max()))-2
 
     print(pc_record_df)
-    encode_time = time.time()
+    encode_time = time.time
 
     # 2 Connect to the database and commit change
     import_data_connection(engine_key, meta_dict, pc_record)
-    import_time = time.time()
+    import_time = time.time
     print('encoding time: ', encode_time-start_time)
     print('importing time: ', import_time-encode_time)
