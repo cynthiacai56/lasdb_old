@@ -44,7 +44,7 @@ def EncodeMorton2D(x, y):
         int: 64 bit morton code in 2D
 
     """
-    return bin(Expand2D(x) + (Expand2D(y) << 1))
+    return Expand2D(x) + (Expand2D(y) << 1)
 
 
 ###############################################################################
@@ -289,12 +289,19 @@ def DecodeMorton3DZ(mortonCode):
 
 
 def compute_split_length(mkey, ratio):
-    length = len(mkey) - 2
+    length = len(bin(mkey)) - 2
     head_length = int(length * ratio)
     if head_length % 2 != 0:
         split_index = head_length - 1
     tail_length = length - head_length
     return tail_length
+
+
+def split_bin(num, tail_length):
+    head = num >> tail_length
+    tail = num - (head << tail_length)
+
+    return head, tail
 
 
 def split_string(my_string, tail_length):

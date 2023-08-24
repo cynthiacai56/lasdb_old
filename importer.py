@@ -9,10 +9,10 @@ def main():
 
     # Mode 1: single-file
     parser_single = subparsers.add_parser("single", help="single-file mode help")
-    parser_single.add_argument("-p", default="E:\\Geomatics\\GEO2020 Thesis\\data\\", help="input path")
+    parser_single.add_argument("-p", default="/work/tmp/cynthia/", help="input path")
     parser_single.add_argument("-f", default="C_68BN2.LAZ",  help="input file")
     parser_single.add_argument("-r", default=0.7, help="the ratio to split the sfc key")
-    parser_single.add_argument("-u", default='postgresql://cynthia: dV337bUP!@pakhuis.tudelft.nl:5432/cynthia', help="database url")
+    parser_single.add_argument("-u", default='postgresql://cynthia:dV337bUP!@localhost/cynthia', help="database url")
     # database url: dialect+driver://username:password@host:port/database
     #parser_single.add_argument("-k", default='postgresql://postgres:050694@localhost:5432/lasdb', help="the key to creat engine")
     #parser_single.add_argument("-s", default='lasdb',help="schema")
@@ -20,9 +20,9 @@ def main():
 
     # Mode 2: multiple-file (a directory)
     parser_multi = subparsers.add_parser("multiple", help="single-file mode help")
-    parser_multi.add_argument("-p", default="E:\\Geomatics\\GEO2020 Thesis\\data\\", help="input path")
+    parser_multi.add_argument("-p", default="/work/tmp/cynthia/", help="input path")
     parser_multi.add_argument("-r", default=0.7, help="the ratio to split the sfc key")
-    parser_multi.add_argument("-u", default='postgresql://cynthia: dV337bUP!@pakhuis.tudelft.nl:5432/cynthia', help="database url")
+    parser_multi.add_argument("-u", default='postgresql://cynthia:dV337bUP!@localhost/cynthia', help="database url")
     parser_multi.add_argument("-n", default=20, help="the number of imported files")
     #parser_single.add_argument("-k", default='postgresql://postgres:050694@localhost:5432/lasdb', help="the key to creat engine")
     parser_multi.set_defaults(func=multi_importer)
@@ -40,9 +40,9 @@ def main():
 
 def test():
     input_path = 'E:\\Geomatics\\GEO2020 Thesis\\data\\'
-    input_filename = 'C_37EN1_100m.las'
+    input_filename = 'C_37EN1_500m.las'
     ratio = 0.7
-    engine_key = 'postgresql://postgres:050694@localhost:5432/lasdb_100_70'
+    engine_key = 'postgresql://postgres:050694@localhost:5432/lasdb_500_70'
     meta_id = 1
 
     one_file_importer(meta_id, input_path, input_filename, ratio, engine_key)
@@ -67,4 +67,5 @@ def test():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    test()
