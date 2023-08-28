@@ -20,11 +20,6 @@ class Meta(Base):
     offsets = Column(ARRAY(Float))
     bbox = Column(ARRAY(Float))
     children = relationship("PointRecord", back_populates="parent")
-    #transform = Column(JSONB(none_as_null=True)) # scales, offsets
-    #bbox = Column(JSONB(none_as_null=True)) # xyz_min, xyz_max
-    #started_at = Column(TIMESTAMP, default=func.now())
-    #finished_at = Column(TIMESTAMP)
-
 
 class PointRecord(Base):
     __tablename__ = 'pc_record'

@@ -25,7 +25,6 @@ def import_data_connection(engine_key, meta_dict, pc_groups):
                          tail_length=meta_dict['tail_length'],
                          scales=meta_dict['scales'],
                          offsets=meta_dict['offsets'],
-                         transform=meta_dict['transform'],
                          bbox=meta_dict['bbox'])
     session.add(pc_meta_table)
     session.commit()
