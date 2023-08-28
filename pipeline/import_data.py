@@ -24,7 +24,7 @@ def get_file_names_in_directory(directory_path):
 
 def multi_importer(args):
     p, r, n = args.p, args.r, args.n
-    username, password, hostname, dbname = args.u, args.key, args.host, args.d
+    username, password, hostname, dbname = args.user, args.key, args.host, args.db
 
     files = get_file_names_in_directory(p)
     db_url = 'postgresql://'+ username + ':' + password + '@'+ hostname + '/' + dbname
@@ -38,7 +38,7 @@ def multi_importer(args):
 
 
 def single_importer(args):
-    username, password, hostname, dbname = args.u, args.key, args.host, args.d
+    username, password, hostname, dbname = args.user, args.key, args.host, args.db
     db_url = 'postgresql://' + username + ':' + password + '@' + hostname + '/' + dbname
     one_file_importer(1, args.p, args.f, args.r, db_url)
 
