@@ -16,7 +16,8 @@ class Meta(Base):
     number_of_points = Column(Integer)
     head_length = Column(Integer)
     tail_length = Column(Integer)
-    transform = Column(ARRAY(Float))
+    scales = Column(ARRAY(Float))
+    offsets = Column(ARRAY(Float))
     bbox = Column(ARRAY(Float))
     children = relationship("PointRecord", back_populates="parent")
     #transform = Column(JSONB(none_as_null=True)) # scales, offsets

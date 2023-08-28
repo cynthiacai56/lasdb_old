@@ -12,9 +12,10 @@ def main():
     parser_single.add_argument("-p", default="/work/tmp/cynthia/", help="input path")
     parser_single.add_argument("-f", default="C_68BN2.LAZ",  help="input file")
     parser_single.add_argument("-r", default=0.7, help="the ratio to split the sfc key")
-    parser_single.add_argument("-u", default='postgresql://cynthia:dV337bUP!@localhost/cynthia', help="database url")
-    # database url: dialect+driver://username:password@host:port/database
-    #parser_single.add_argument("-k", default='postgresql://postgres:050694@localhost:5432/lasdb', help="the key to creat engine")
+    parser_single.add_argument("-u", default='cynthia', help='database username')
+    parser_single.add_argument("-k", default='123456', help='database password')
+    parser_single.add_argument("-h", default='localhost', help='database host')
+    parser_single.add_argument('-d', default='cynthia', help='database name')
     #parser_single.add_argument("-s", default='lasdb',help="schema")
     parser_single.set_defaults(func=single_importer)
 
@@ -22,9 +23,11 @@ def main():
     parser_multi = subparsers.add_parser("multiple", help="single-file mode help")
     parser_multi.add_argument("-p", default="/work/tmp/cynthia/", help="input path")
     parser_multi.add_argument("-r", default=0.7, help="the ratio to split the sfc key")
-    parser_multi.add_argument("-u", default='postgresql://cynthia:dV337bUP!@localhost/cynthia', help="database url")
+    parser_multi.add_argument("-u", default='cynthia', help='database username')
+    parser_multi.add_argument("-k", default='123456', help='database password')
+    parser_multi.add_argument("-h", default='localhost', help='database host')
+    parser_multi.add_argument('-d', default='cynthia', help='database name')
     parser_multi.add_argument("-n", default=20, help="the number of imported files")
-    #parser_single.add_argument("-k", default='postgresql://postgres:050694@localhost:5432/lasdb', help="the key to creat engine")
     parser_multi.set_defaults(func=multi_importer)
 
 
