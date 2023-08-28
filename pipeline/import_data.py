@@ -110,6 +110,8 @@ class PointGroupProcessor:
 
         # To print the sfc groups
         pc_groups_df = pd.DataFrame(pc_groups, columns=['sfc_head', 'sfc_tail', 'Z', 'classification'])
+        if len(pc_groups) > 100:
+            pc_groups_df.to_csv('pc_groups.csv', index=False)
         print(pc_groups_df)
 
         return pc_groups
