@@ -56,8 +56,8 @@ def one_file_importer(meta_id, input_path, input_filename, ratio, engine_key):
                      'number_of_points': f.header.point_count,
                      'head_length': 0,
                      'tail_length': 0,
-                     'scales':[scale for scale in f.header.scales]
-                     'offsets': [offset for offset in f.header.offsets]
+                     'scales': [scale for scale in f.header.scales],
+                     'offsets': [offset for offset in f.header.offsets],
                      'bbox': [f.header.x_min, f.header.x_max, f.header.y_min, f.header.y_max,
                               f.header.z_min, f.header.z_max]
                      }
