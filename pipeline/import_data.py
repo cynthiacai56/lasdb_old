@@ -70,7 +70,7 @@ def one_file_importer(meta_id, input_path, input_filename, ratio, engine_key):
         meta_dict['tail_length'] = tail_length
 
 
-        points_per_iter = 10000000
+        points_per_iter = 50000000
         split_keys = []
 
         if f.header.point_count < points_per_iter:
