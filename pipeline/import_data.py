@@ -92,14 +92,14 @@ class PointGroupProcessor:
             split_keys = []
             if f.header.point_count < points_per_iter:
                 las = laspy.read(self.input)
-                for i in tqdm(range(f.header.point_count)):
+                for i in range(f.header.point_count):
                     mkey = EncodeMorton2D(int(las.x[i]), int(las.y[i]))
                     head, tail = split_bin(mkey, tail_len)
                     split_keys.append([head, tail, float(las.z[i]), int(las.classification[i])])
             else:
                 for pts in f.chunk_iterator(points_per_iter):
                     split_keys_per_iter = []
-                    for i in tqdm(range(points_per_iter)):
+                    for i in tqdm(range(len(pts))):
                         mkey = EncodeMorton2D(int(pts.x[i]), int(pts.y[i]))
                         head, tail = split_bin(mkey, tail_len)
                         split_keys_per_iter.append([head, tail, float(pts.z[i]), int(pts.classification[i])])
