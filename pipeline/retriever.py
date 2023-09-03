@@ -1,159 +1,136 @@
 import numpy as np
 from sqlalchemy import create_engine, DDL
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+#from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from pcsfc.decoder import DecodeMorton2D
 from pcsfc.range_search import morton_range
 from pcsfc.geometry_query import bbox_filter, circle_filter, polygon_filter
 from model.storage import Meta, PointRecord
-from model.temp import TempRange, TempOverlap, TempPoint
+from model.temp import TempRange#, TempOverlap, TempPoint
 
 
+class GeometryFilter:
+    MODE_BBOX = 'mode_bbox'
+    MODE_CIRCLE = 'mode_circle'
+    MODE_POLYGON = 'mode_polygon'
+    def __init__(self, mode, constr, head_len, tail_len, db_url):
+        self.mode = mode
+        self.constr = constr
+        self.head_len = head_len
+        self.tail_len = tail_len
+        self.db_url = db_url
+
+        self.bbox = self.get_bbox()
+
+    def query(self):
+        # meta filter: to be continued
+        # Bbox filter
+        head_rgs, head_ols = morton_range(self.bbox, 0, self.head_len, self.tail_len)
+
+        if len(head_rgs) > 0:
+            range_pts = self.get_groups_with_containment(head_rgs)
+        else:
+            range_pts = [0]
+        if len(head_ols) > 0:
+            overlap_pts = self.get_groups_with_overlaps(head_ols)
+        else:
+            overlap_pts = []
+
+        print('range points', len(range_pts))
+        print('overlapping points', len(overlap_pts))
+
+        # Geometry filter
+        points = range_pts + overlap_pts if range_pts is not None and overlap_pts is not None else []
+
+        if self.mode == self.MODE_BBOX:
+            return points
+        elif self.mode == self.MODE_CIRCLE:
+            return circle_filter(self.constr[0], self.constr[1], points)
+        elif self.mode == self.MODE_POLYGON:
+            return polygon_filter(self.constr, points)
+
+    def get_bbox(self):
+        if self.mode == self.MODE_BBOX: # [x_min, x_max, y_min, y_max]
+            bbox = self.constr
+        elif self.mode == self.MODE_CIRCLE: # [[center_x, center_y], radius]
+            x_min, x_max = self.constr[0][0] - self.constr[1], self.constr[0][0] + self.constr[1]
+            y_min, y_max = self.constr[0][1] - self.constr[1], self.constr[0][1] + self.constr[1]
+            bbox = [x_min, x_max, y_min, y_max]
+        elif self.mode == self.MODE_POLYGON: # a set of point coordinates
+            x = [pt[0] for pt in self.constr]
+            y = [pt[1] for pt in self.constr]
+            x_min, x_max = min(x), max(x)
+            y_min, y_max = min(y), max(y)
+            bbox = [x_min, x_max, y_min, y_max]
+        else:
+            print("Invalid mode")
+        return bbox
 
 
-nbits = 64
-x_min, x_max, y_min, y_max = 80000000, 80000050, 443750000, 443800000
-tail_length = 12
-engine_key = 'postgresql://postgres:050694@localhost:5432/lasdb_1_70'
+    def get_groups_with_containment(self, head_list):
+        # Connect to the database and create a session
+        engine = create_engine(self.db_url)
+        Session = sessionmaker(bind=engine)
+        session = Session()
 
+        # Second-filter: head
+        # For all sfc_heads in the range list, extract all records and decode the points
+        # However, the third-filter should be applied to the decoded points
 
-def head_filter(x_min, x_max, y_min, y_max, tail_length, engine_key):
-
-    # Step 1: First-filter search range
-    ranges, overlaps = morton_range(nbits, x_min, y_min, x_max, y_max, tail_length)
-    # Step 2: Create Range Table
-    # Step 3: Join Range Table and the Data Table
-    engine = create_engine()
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-
-    if len(ranges) > 0:
-        ranges_shift = [key >> tail_length for key in ranges]
+        # Create temporary range table
         TempRange.__table__.create(engine, checkfirst=True)
-        for item in ranges_shift:
+        for item in head_list:
+            # Insert queried ranges into the range table
             temp_range_row = TempRange(start=item[0], end=item[1])
             session.add(temp_range_row)
-        query_res_1 = session.query(PointRecord).join(TempRange,
-                                                      PointRecord.head_sfc.between(TempRange.start, TempRange.end)).all()
 
-    if len(overlaps) > 0:
-        overlaps_shift = [key >> tail_length for key in overlaps]
-        TempOverlap.__table__.create(engine, checkfirst=True)
-        for item in overlaps_shift:  # overlaps_shift:
-            temp_overlap_row = TempOverlap(head=item)
-            session.add(temp_overlap_row)
-        # session.commit()
-        # first_100_records = session.query(TempOverlap).limit(20).all()
+        # Query the ranges in the pc_record table
+        res_rg = session.query(PointRecord).join(TempRange,
+                                                     PointRecord.sfc_head.between(TempRange.start, TempRange.end)).all()
 
-        # for record in first_100_records:
-        # print(record.head)
-        query_res_2 = session.query(PointRecord).join(TempOverlap, PointRecord.sfc_head == TempOverlap.head).all()
+        # Unpack and convert the records to points
+        query_pts = []
+        for record in res_rg:
+            # Unpack the tails
+            for i in range(len(record.sfc_tail)):  # Each point
+                # Decode
+                sfc_key = record.sfc_head << self.tail_len | record.sfc_tail[i]
+                x, y = DecodeMorton2D(sfc_key)
+                query_pts.append([x, y, record.z[i], record.classification[i]])
 
-    # Step 4: Decode
-    # pc_record: meta_id, sfc_head, sfc_tail, Z, classification
-    # temp_point: X, Y, Z, classification
-    query_points_list = []
-    for record in query_res_2:  # Each group
-        sfc_head = record.sfc_head
-        sfc_tail_list = record.sfc_tail
-        Z_list = record.Z
-        classification_list = record.classification
-
-        for i in range(len(sfc_tail_list)):  # Each point
-            sfc_tail = sfc_tail_list[i]
-            Z = Z_list[i]
-            classification_code = classification_list[i]
-
-            # Decode
-            sfc_key = sfc_head << tail_length | sfc_tail
-            X, Y = DecodeMorton2D(sfc_key)
-            query_points_list.append([X, Y, Z, classification_code])
-
-    session.commit()
-    session.close()
-
-    query_points = np.array(query_points_list)
-    return query_points # a list of points
-
-# Step 5: Second-filter geometry
-# In other functions
+        return query_pts
 
 
-def bbox_search(args):
-    # Load parameters
-    x_min, x_max, y_min, y_max = args.x[0], args.x[1], args.y[0], args.y[1]
-    tail_length = args.t
-    engine_key = args.k
-
-    # First filter and decode
-    pts1 = head_filter(x_min, x_max, y_min, y_max, tail_length, engine_key)
-
-    # Second filter
-    pts2 = bbox_filter(x_min, x_max, y_min, y_max, pts1)
-
-    # Display?
-    # Export to txt, las | Show in the database
-    # a view is the result set of a stored query, which can be queried in the same manner as a persistent database collection object.
-    # as a result set, it is a virtual table computed or collated dynamically from data in the database when access to that view is requested
-
-
-    engine = create_engine(engine_key)
-
-    TempPoint.__table__.create(engine, checkfirst=True)
-
-    # Import data to temp_point table
-    for pt in pts2:
-        temp_pt_record = TempPoint(X=pt[0], Y=pt[1], Z=pt[2], classification=pt[3])
+    def get_groups_with_overlaps(self, head_ols):
+        engine = create_engine(self.db_url)
+        Session = sessionmaker(bind=engine)
         session = Session()
-        session.add(temp_pt_record)
+
+        # 对于overlap table里得到的head，继续对tail执行range_search()
+        # 但是，有的要进行二次验证，针对具体的geometry
+        res_ol = session.query(PointRecord).filter(PointRecord.sfc_head.in_(head_ols)).all()
+
+        # Unpack and convert the records to points
+        # pc_record: meta_id, sfc_head, sfc_tail, Z, classification
+        # temp_point: X, Y, Z, classification
+        query_pts = []
+        for record in res_ol:  # Each group
+            # only ranges have results, just extract them out; overlaps should be empty
+            # Check which tails of this head in within the ranges
+            tail_rgs, tail_ols = morton_range(self.bbox, record.sfc_head, self.tail_len, 0)
+            # Unpack the tails
+            for i in range(len(record.sfc_tail)):  # Each point
+                # Check if the tail in within the ranges
+                check_in_range = any(start <= record.sfc_tail[i] <= end for start, end in tail_rgs)
+                if check_in_range == 1:
+                    # Decode
+                    sfc_key = record.sfc_head << self.tail_len | record.sfc_tail[i]
+                    x, y = DecodeMorton2D(sfc_key)
+                    query_pts.append([x, y, record.z[i], record.classification[i]])
+
         session.commit()
         session.close()
 
-    # Create view
-    view = DDL("CREATE VIEW query_point_view AS SELECT X, Y, Z, classification FROM temp_points")
-    engine.execute(view)
+        return query_pts
 
-    return pts2
-
-def circle_search(args):
-    # Load parameters
-    center, radius = args.p, args.r
-    x_min, x_max = center[0] - radius, center[0] + radius
-    y_min, y_max = center[1] - radius, center[1] + radius
-    tail_length = args.t
-    engine_key = args.k
-
-    # First filter and decode
-    pts1 = head_filter(x_min, x_max, y_min, y_max, tail_length, engine_key)
-
-    # Second filter
-    pts2 = circle_filter(center, radius, pts1)
-
-    # Display?
-    # Export to txt, las | Show in the database
-
-    return pts2
-
-def polygon_search(args):
-    poly_pts = args.p
-    x_min, x_max = min(poly_pts, key=lambda coord: coord[0])[0], max(poly_pts, key=lambda coord: coord[0])[0]
-    y_min, y_max = min(poly_pts, key=lambda coord: coord[1])[1], max(poly_pts, key=lambda coord: coord[1])[1]
-    tail_length = args.t
-    engine_key = args.k
-
-    # First filter and decode
-    pts1 = head_filter(x_min, x_max, y_min, y_max, tail_length, engine_key)
-
-    # Second filter
-    pts2 = polygon_filter(poly_pts, pts1)
-
-    return pts2
-
-def nn_search(args):
-    return 0
-
-def cla_search(args):
-    return 0
