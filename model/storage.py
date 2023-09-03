@@ -28,7 +28,7 @@ class PointRecord(Base):
     # Columns
     meta_id = Column(Integer, ForeignKey(Meta.id))
     sfc_head = Column(Integer, primary_key=True, index=True)
-    sfc_tail = Column(ARRAY(Integer), nullable = False)
-    Z = Column(ARRAY(Float))
+    sfc_tail = Column(ARRAY(Integer), nullable=False)
+    z = Column(ARRAY(Float))
     classification = Column(ARRAY(Integer))
     parent = relationship('Meta', back_populates='children')

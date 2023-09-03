@@ -1,62 +1,15 @@
-import os
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import laspy
-
 from tqdm import tqdm
 
-from db.import_data import import_data_connection
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
+from sqlalchemy.orm import sessionmaker
+from model.storage import Base, Meta, PointRecord
+
 from pcsfc.encoder import EncodeMorton2D, compute_split_length, split_bin, make_groups
 
-import time
-
-def get_file_names_in_directory(directory_path):
-    directory_path = Path(directory_path)
-    if not directory_path.is_dir():
-        print(f"Error: {directory_path} is not a valid directory.")
-        return []
-
-    file_names = [file_path.name for file_path in directory_path.glob('*') if file_path.is_file()]
-    return file_names
-
-
-def multi_importer(args):
-    p, r, n = args.p, args.r, args.n
-    files = get_file_names_in_directory(p)
-
-    user, password, host, db = args.user, args.key, args.host, args.db
-    db_url = 'postgresql://' + user + ':' + password + '@'+ host + '/' + db
-    # database url: dialect+driver://username:password@host:port/database
-    # example: 'postgresql://cynthia:123456@localhost:5432/lasdb'
-    points_per_iter = 50000000
-
-    for i in range(min(len(files), n)):
-        f = files[i]
-        importer = PointGroupProcessor(i, p, f, r)
-        importer.import_to_database(db_url)
-
-
-def single_importer(args):
-    # Load parameters
-    path, file, ratio = args.p, args.f, args.r
-    user, password, host, db = args.user, args.key, args.host, args.db
-    db_url = 'postgresql://' + user + ':' + password + '@' + host + '/' + db
-
-    # Load metadata; Read, encode and group the points
-    start_time = time.time()
-    importer = PointGroupProcessor(1, path, file, ratio)
-    encode_time = time.time()
-
-    # Import the point groups into the database
-    importer.import_to_database(db_url)
-    import_time = time.time()
-
-    # Print run times
-    print('Encoding time: ', encode_time - start_time)
-    print('Importing time: ', import_time - encode_time)
-    print('Total time:', import_time - start_time)
 
 class PointGroupProcessor:
     def __init__(self, meta_id, path, file, ratio):
@@ -83,7 +36,7 @@ class PointGroupProcessor:
                          'bbox': [f.header.x_min, f.header.x_max, f.header.y_min, f.header.y_max,
                                   f.header.z_min, f.header.z_max]
                          }
-
+        print('Metadata: ', meta_dict)
         return meta_dict
 
     def process_points(self, tail_len, points_per_iter):
@@ -117,5 +70,37 @@ class PointGroupProcessor:
         return pc_groups
 
     def import_to_database(self, db_url):
-        import_data_connection(db_url, self.metas, self.pc_groups)
+        #import_data_connection(db_url, self.metas, self.pc_groups)
 
+        # 1. Create a connection to the PostgreSQL database using SQLAlchemy
+        engine = create_engine(db_url)
+        if not database_exists(engine.url):
+            create_database(engine.url)
+
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        # 2.Create tables in the database
+        Base.metadata.create_all(engine)  # , schema='lasdb')
+
+        # 3. Import data to pc_metadata table
+        pc_meta_table = Meta(id=self.metas['meta_id'],
+                             version=self.metas['version'],
+                             source_file=self.metas['source_file'],
+                             number_of_points=self.metas['number_of_points'],
+                             head_length=self.metas['head_length'],
+                             tail_length=self.metas['tail_length'],
+                             scales=self.metas['scales'],
+                             offsets=self.metas['offsets'],
+                             bbox=self.metas['bbox'])
+        session.add(pc_meta_table)
+        session.commit()
+        session.close()
+
+        # 4. Import data to pc_record table
+        for pt in self.pc_groups:
+            pc_record = PointRecord(meta_id=self.metas['meta_id'], sfc_head=pt[0], sfc_tail=pt[1], z=pt[2], classification=pt[3])
+            session = Session()
+            session.add(pc_record)
+            session.commit()
+            session.close()

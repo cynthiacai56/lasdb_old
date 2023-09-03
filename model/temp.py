@@ -14,6 +14,7 @@ class TempRange(Base):
     start = Column(Integer, primary_key=True)
     end = Column(Integer)
 
+'''
 class TempOverlap(Base):
     __tablename__ = 'temp_overlap'
     __table_args__ = {'prefixes': ['TEMPORARY']}
@@ -21,14 +22,23 @@ class TempOverlap(Base):
 
     head = Column(Integer, primary_key=True)
 
+class TempPointMorton(Base):
+    __tablename__ = 'temp_point'
+    __table_args__ = {'prefixes': ['TEMPORARY']}
+
+    sfc_tail = Column(Float, primary_key=True)
+    z = Column(Float)
+    classification = Column(Integer)
+    import_meta = relationship(Meta)
+
 class TempPoint(Base):
     __tablename__ = 'temp_point'
     __table_args__ = {'prefixes': ['TEMPORARY']}
 
     meta_id = Column(Integer, ForeignKey(Meta.id))
 
-    X = Column(Float, primary_key=True)
-    Y = Column(Float)
-    Z = Column(Float)
+    x = Column(Float, primary_key=True)
+    y = Column(Float)
+    z = Column(Float)
     classification = Column(Integer)
-    import_meta = relationship(Meta)
+'''

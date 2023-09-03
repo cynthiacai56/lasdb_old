@@ -23,7 +23,7 @@ def bbox_filter(x_min, x_max, y_min, y_max, points):
 
 
 def circle_filter(center, radius, points):
-    pts_2d = points[:, :2]
+    pts_2d = np.array(points)[:, :2]
     tree = KDTree(pts_2d)
     indices = tree.query_ball_point(center, radius)
     points_within_circle = [points[i] for i in indices]
@@ -34,11 +34,9 @@ def polygon_filter(polygon_vertices, points):
     polygon = Polygon(polygon_vertices)
     points_within_polygon = []
 
-    for point in points:
-        x, y = point[0], point[1]
-        point_obj = Point(x, y)
-
+    for pt in points:
+        point_obj = Point(pt[0], pt[1])
         if polygon.contains(point_obj):
-            points_within_polygon.append(point)
+            points_within_polygon.append(pt)
 
     return points_within_polygon
