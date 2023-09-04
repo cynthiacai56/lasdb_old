@@ -23,7 +23,7 @@ def multi_importer(args):
     # example: 'postgresql://cynthia:123456@localhost:5432/lasdb'
     points_per_iter = 50000000
 
-    for i in range(min(len(files), n)):
+    for i in range(len(files)):#(min(len(files), n)):
         f = files[i]
         importer = PointGroupProcessor(i, p, f, r)
         importer.import_to_database(db_url)
@@ -73,7 +73,7 @@ def main():
     parser_multi.add_argument("-key", default='123456', help='database password')
     parser_multi.add_argument("-host", default='localhost', help='database host')
     parser_multi.add_argument('-db', default='cynthia', help='database name')
-    parser_multi.add_argument("-n", default=10, help="the number of imported files")
+    parser_multi.add_argument("-n", default=20, help="the number of imported files")
     parser_multi.set_defaults(func=multi_importer)
 
     args = parser.parse_args()
