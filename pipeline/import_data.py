@@ -62,7 +62,7 @@ class PointGroupProcessor:
                     split_keys = split_keys + split_keys_per_iter
 
         pc_groups = make_groups(split_keys)
-        print(len(pc_groups)
+        print(len(pc_groups))
 
         return pc_groups
 
