@@ -16,18 +16,34 @@ def get_file_names_in_directory(directory_path):
 
 
 def multi_importer(args):
+    start_time_big = time.time()
     p, r, n = args.p, args.r, args.n
     files = get_file_names_in_directory(p)
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     # database url: dialect+driver://username:password@host:port/database
     # example: 'postgresql://cynthia:123456@localhost:5432/lasdb'
     points_per_iter = 50000000
+    begin_t = time.time() - start_time_big
 
+    encode_t, import_t = 0, 0
     for i in range(len(files)):#(min(len(files), n)):
+        start_time = time.time()
         f = files[i]
         importer = PointGroupProcessor(i, p, f, r)
+        encode_time = time.time()
         importer.import_to_database(db_url)
-
+        import_time = time.time()
+        print(i, ': file', f, 'is imported into the database.')
+        
+        # Calculate run time
+        encode_t = encode_t + encode_time - start_time
+        import_t = import_t + import_time - encode_time
+        
+    end_time_big = time.time()
+    print('Initial time:', begin_t)
+    print('Total processing time:', encode_t)
+    print('Total importing time:', import_t)
+    print('Total run time:', start_time_big-end_time_big)
 
 def single_importer(args):
     # Load parameters
