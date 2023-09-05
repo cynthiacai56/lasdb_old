@@ -26,7 +26,7 @@ class PointRecord(Base):
     #__table_args__ = {"schema": "lasdb"}
 
     # Columns
-    meta_id = Column(Integer, ForeignKey(Meta.id))
+    meta_id = Column(Integer, primary_key=True, ForeignKey(Meta.id))
     sfc_head = Column(Integer, primary_key=True, index=True)
     sfc_tail = Column(ARRAY(Integer), nullable=False)
     z = Column(ARRAY(Float))
