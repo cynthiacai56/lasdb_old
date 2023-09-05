@@ -1,6 +1,7 @@
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, ForeignKey,Integer, Float, String, ARRAY # LargeBinary
 from sqlalchemy import MetaData, Table # for temporary table
+#from sqlalchemy.schema import PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 #from geoalchemy2 import Geometry #bbox = Column(Geometry("Polygon"))
 
@@ -23,10 +24,11 @@ class Meta(Base):
 
 class PointRecord(Base):
     __tablename__ = 'pc_record_002201m'
+    #__table_args__ = (PrimaryKeyConstraint('meta_id', 'sfc_head'))
     #__table_args__ = {"schema": "lasdb"}
 
     # Columns
-    meta_id = Column(Integer, primary_key=True, ForeignKey(Meta.id))
+    meta_id = Column(Integer, ForeignKey(Meta.id), primary_key=True)
     sfc_head = Column(Integer, primary_key=True, index=True)
     sfc_tail = Column(ARRAY(Integer), nullable=False)
     z = Column(ARRAY(Float))
