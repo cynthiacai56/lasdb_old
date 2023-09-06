@@ -9,7 +9,7 @@ Base = declarative_base()
 metadata = Base.metadata
 
 class Meta(Base):
-    __tablename__ = 'pc_metadata_002201m'
+    __tablename__ = 'pc_metadata_000020m'
     #__table_args__ = {"schema": "lasdb"}
     id = Column(Integer, primary_key=True)#, autoincrement=True)
     version = Column(Float)
@@ -23,7 +23,7 @@ class Meta(Base):
     children = relationship("PointRecord", back_populates="parent")
 
 class PointRecord(Base):
-    __tablename__ = 'pc_record_002201m'
+    __tablename__ = 'pc_record_000020m'
     #__table_args__ = (PrimaryKeyConstraint('meta_id', 'sfc_head'))
     #__table_args__ = {"schema": "lasdb"}
 
