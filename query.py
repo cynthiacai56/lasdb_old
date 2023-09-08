@@ -48,7 +48,8 @@ def polygon_search(args):
     for inner in input_string.split(';'):
         pt = [int(item) for item in inner.split(',')]
         constr.append(pt)
-        
+
+    print(constr)
     polygon_filter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr, head_len, tail_len, db_url)
     results = polygon_filter.query()
 
