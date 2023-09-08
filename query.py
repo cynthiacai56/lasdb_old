@@ -6,9 +6,7 @@ import argparse
 
 def bbox_search(args):
     start_time = time.time()
-    print(args.x)
-    print(type(args.x))
-    constr = [int(args.x[0]), int(args.x[1]), int(args.y[0]), int(args.y[1])] # x_min, x_max, y_min, y_max
+    constr = [int(args.xmin), int(args.xmax), int(args.ymin), int(args.ymax] # x_min, x_max, y_min, y_max
     tail_len = int(args.t)
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     head_len = 26
@@ -24,7 +22,7 @@ def bbox_search(args):
 
 def circle_search(args):
     start_time = time.time()
-    constr = [args.p, args.r] # [center_pt, radius]
+    constr = [[int(args.x), int(args.y)], int(args.r)] # [center_pt, radius]
     tail_len = args.t
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     head_len = 26
@@ -61,8 +59,10 @@ def main():
 
     # Mode 1: bbox
     parser_bbox = subparsers.add_parser("bbox", help="query-with-bounding-box mode help")
-    parser_bbox.add_argument("-x", default=[0, 50], help='the boundary of x value of the selected points, e.g. [0, 50]')
-    parser_bbox.add_argument("-y", default=[0, 50], help='the boundary of y value of the selected points, e.g. [0, 50]')
+    parser_bbox.add_argument("-xmin", default=85000, help='the minimum x value of the selected points')
+    parser_bbox.add_argument("-xmax", default=86000, help='the maximum x value of the selected points')
+    parser_bbox.add_argument("-ymin", default=446250, help='the minimum y value of the selected points')
+    parser_bbox.add_argument("-ymax", default=447500, help='the maximum y value of the selected points')
     parser_bbox.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
     parser_bbox.add_argument("-user", default='cynthia', help='database username')
     parser_bbox.add_argument("-key", default='123456', help='database password')
@@ -72,8 +72,9 @@ def main():
 
     # Mode 2: circle
     parser_circle = subparsers.add_parser("circle", help="query-with-circle mode help")
-    parser_circle.add_argument("-p", default=[0, 0], help='the minimum x value of the selected points, e.g. [0, 0]')
-    parser_circle.add_argument("-r", default=50, help='the maximum x value of the selected points, e.g. 50')
+    parser_circle.add_argument("-x", default=85500, help='the x coordinate of the center point')
+    parser_circle.add_argument("-y", default=445700, help='the y coordinate of the center point')
+    parser_circle.add_argument("-r", default=50, help='the radius of the circle, e.g. 50')
     parser_circle.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
     parser_circle.add_argument("-user", default='cynthia', help='database username')
     parser_circle.add_argument("-key", default='123456', help='database password')
