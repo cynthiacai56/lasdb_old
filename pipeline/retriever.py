@@ -46,9 +46,9 @@ class GeometryFilter:
         if self.mode == self.MODE_BBOX:
             return points
         elif self.mode == self.MODE_CIRCLE:
-            return circle_filter(self.constr[0], self.constr[1], points)
+            return circle_filter(points, self.constr[0], self.constr[1])
         elif self.mode == self.MODE_POLYGON:
-            return polygon_filter(self.constr, points)
+            return polygon_filter(points, self.constr)
 
     def get_bbox(self):
         if self.mode == self.MODE_BBOX: # [x_min, x_max, y_min, y_max]
