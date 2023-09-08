@@ -58,8 +58,8 @@ class GeometryFilter:
             y_min, y_max = self.constr[0][1] - self.constr[1], self.constr[0][1] + self.constr[1]
             bbox = [x_min, x_max, y_min, y_max]
         elif self.mode == self.MODE_POLYGON: # a set of point coordinates
-            x = [pt[0] for pt in self.constr]
-            y = [pt[1] for pt in self.constr]
+            x = [pt[0] for pt in self.constr[0]]
+            y = [pt[1] for pt in self.constr[0]]
             x_min, x_max = min(x), max(x)
             y_min, y_max = min(y), max(y)
             bbox = [x_min, x_max, y_min, y_max]
