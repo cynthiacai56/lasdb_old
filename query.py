@@ -14,8 +14,8 @@ def bbox_search(args):
     bbox_filter = GeometryFilter(GeometryFilter.MODE_BBOX, constr, head_len, tail_len, db_url)
     results = bbox_filter.query()
 
-    print('The number of results:', len(results))
     print('The results:', results)
+    print('The number of results:', len(results))
 
     end_time = time.time()
     print('The run time:', end_time-start_time)
@@ -30,8 +30,8 @@ def circle_search(args):
     circle_filter = GeometryFilter(GeometryFilter.MODE_CIRCLE, constr, head_len, tail_len, db_url)
     results = circle_filter.query()
 
-    print('The number of results:', len(results))
     print('The results:', results)
+    print('The number of results:', len(results))
 
     end_time = time.time()
     print('The run time:', end_time-start_time)
@@ -46,8 +46,8 @@ def polygon_search(args):
     polygon_filter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr, head_len, tail_len, db_url)
     results = polygon_filter.query()
 
-    print('The number of results:', len(results))
     print('The results:', results)
+    print('The number of results:', len(results))
 
     end_time = time.time()
     print('The run time:', end_time-start_time)
