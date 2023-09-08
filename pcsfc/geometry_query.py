@@ -20,8 +20,9 @@ def circle_filter(points, center, radius):
     return points_within_circle
 
 
-def polygon_filter(points, polygon_vertices, hole_vertices=[]):
-    polygon = Polygon(polygon_vertices)
+def polygon_filter(points, polygon_vertices):
+    out_vertices, hole_vertices = polygon_vertices
+    polygon = Polygon(out_vertices)
     if len(hole_vertices) >= 3:
         hole_polygon = Polygon(hole_vertices)
         polygon = polygon.difference(hole_polygon)
