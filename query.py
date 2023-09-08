@@ -6,7 +6,7 @@ import argparse
 
 def bbox_search(args):
     start_time = time.time()
-    constr = [int(args.x[0]), int(args.x[1]), int(args.y[0]), args.int(y[1])] # x_min, x_max, y_min, y_max
+    constr = [int(args.x[0]), int(args.x[1]), int(args.y[0]), int(args.y[1])] # x_min, x_max, y_min, y_max
     tail_len = int(args.t)
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     head_len = 26
@@ -51,35 +51,7 @@ def polygon_search(args):
 
     end_time = time.time()
     print('The run time:', end_time-start_time)
-
-def test():
-    start_time = time.time()
-
-    tail_len = 12
-    db_url = 'postgresql://postgres:050694@localhost:5432/lasdb_500m_70'
-    head_len = 26
-
-    '''
-    spatial_extent = [80000,80500,443750,444250]
-    constr_bbox = [80010, 80310, 443760, 443960]
-    geofilter = GeometryFilter(GeometryFilter.MODE_BBOX, constr_bbox, head_len, tail_len, db_url)
-
-    constr_circle = [[80250, 444000], 150]
-    geofilter = GeometryFilter(GeometryFilter.MODE_CIRCLE, constr_circle, head_len, tail_len, db_url)
-    '''
-
-    constr_polygon = [[80100, 444000], [80250, 444500], [80300, 444000], [80250, 44350]]
-    geofilter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr_polygon, head_len, tail_len, db_url)
-    results = geofilter.query()
-    print(len(results))
-
-    for i in range(10):
-        print(results[i])
-
-    end_time = time.time()
-    print('The run time:', end_time-start_time)
-
-
+    
 def main():
     # Argument parser
     parser = argparse.ArgumentParser(description="Your script description")
