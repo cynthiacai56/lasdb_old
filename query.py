@@ -6,7 +6,7 @@ import argparse
 
 def bbox_search(args):
     start_time = time.time()
-    constr = [int(args.xmin), int(args.xmax), int(args.ymin), int(args.ymax] # x_min, x_max, y_min, y_max
+    constr = [int(args.xmin), int(args.xmax), int(args.ymin), int(args.ymax)] # x_min, x_max, y_min, y_max
     tail_len = int(args.t)
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     head_len = 26
