@@ -35,6 +35,7 @@ def polygon_filter(polygon_vertices, points):
     points_within_polygon = []
 
     for pt in points:
+        print(type(pt), pt)
         point_obj = Point(pt[0], pt[1])
         if polygon.contains(point_obj):
             points_within_polygon.append(pt)
