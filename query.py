@@ -38,11 +38,17 @@ def circle_search(args):
 
 def polygon_search(args):
     start_time = time.time()
-    constr = args.p  # a set of points
     tail_len = args.t
     db_url = 'postgresql://' + args.user + ':' + args.key + '@' + args.host + '/' + args.db
     head_len = 26
 
+    # Split the input string into individual lists using a delimiter (e.g., ';')
+    input_string = args.p
+    constr = []
+    for inner in input_string.split(';'):
+        pt = [int(item) for item in inner.split(',')]
+        constr.append(pt)
+        
     polygon_filter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr, head_len, tail_len, db_url)
     results = polygon_filter.query()
 
@@ -59,10 +65,10 @@ def main():
 
     # Mode 1: bbox
     parser_bbox = subparsers.add_parser("bbox", help="query-with-bounding-box mode help")
-    parser_bbox.add_argument("-xmin", default=85000, help='the minimum x value of the selected points')
-    parser_bbox.add_argument("-xmax", default=86000, help='the maximum x value of the selected points')
-    parser_bbox.add_argument("-ymin", default=446250, help='the minimum y value of the selected points')
-    parser_bbox.add_argument("-ymax", default=447500, help='the maximum y value of the selected points')
+    parser_bbox.add_argument("-xmin", default=85000, type=int, help='the minimum x value of the selected points')
+    parser_bbox.add_argument("-xmax", default=86000, type=int, help='the maximum x value of the selected points')
+    parser_bbox.add_argument("-ymin", default=446250, type=int, help='the minimum y value of the selected points')
+    parser_bbox.add_argument("-ymax", default=447000, type=int, help='the maximum y value of the selected points')
     parser_bbox.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
     parser_bbox.add_argument("-user", default='cynthia', help='database username')
     parser_bbox.add_argument("-key", default='123456', help='database password')
@@ -72,10 +78,10 @@ def main():
 
     # Mode 2: circle
     parser_circle = subparsers.add_parser("circle", help="query-with-circle mode help")
-    parser_circle.add_argument("-x", default=85500, help='the x coordinate of the center point')
-    parser_circle.add_argument("-y", default=445700, help='the y coordinate of the center point')
-    parser_circle.add_argument("-r", default=50, help='the radius of the circle, e.g. 50')
-    parser_circle.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
+    parser_circle.add_argument("-x", default=85500, type=int, help='the x coordinate of the center point')
+    parser_circle.add_argument("-y", default=445700, type=int, help='the y coordinate of the center point')
+    parser_circle.add_argument("-r", default=50, type=int, help='the radius of the circle, e.g. 50')
+    parser_circle.add_argument("-t", default=12, type=int, help='tail length of the sfc key, e.g. 12')
     parser_circle.add_argument("-user", default='cynthia', help='database username')
     parser_circle.add_argument("-key", default='123456', help='database password')
     parser_circle.add_argument("-host", default='localhost', help='database host')
