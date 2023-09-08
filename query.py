@@ -44,13 +44,24 @@ def polygon_search(args):
 
     # Split the input string into individual lists using a delimiter (e.g., ';')
     input_string = args.p
-    constr = []
+    outer_polygon = []
     for inner in input_string.split(';'):
         pt = [int(item) for item in inner.split(',')]
-        constr.append(pt)
-
-    print(constr)
-    polygon_filter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr, head_len, tail_len, db_url)
+        outer_polygon.append(pt)
+        
+    if args.hole != 'null':
+        input_string = args.p
+        hole = []
+        for inner in input_string.split(';'):
+            pt = [int(item) for item in inner.split(',')]
+            hole.append(pt)
+    else:
+        hole = []
+        
+    polygon = [outer_polygon, hole]
+    print(polygon)
+    
+    polygon_filter = GeometryFilter(GeometryFilter.MODE_POLYGON, polygon, head_len, tail_len, db_url)
     results = polygon_filter.query()
 
     print('The results:', results)
@@ -92,6 +103,7 @@ def main():
     # Mode 3: Polygon
     parser_polygon = subparsers.add_parser("polygon", help="query-with-polygon mode help")
     parser_polygon.add_argument("-p", default=[[0, 0], [50, 0], [0, 50]], help='the set of points of the polygon boundary, e.g. [[0, 0], [50, 0], [0, 50]]')
+    parser_polygon.add_argument("-hole", default='null', help='the vertices of holes in the polygon'
     parser_polygon.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
     parser_polygon.add_argument("-user", default='cynthia', help='database username')
     parser_polygon.add_argument("-key", default='123456', help='database password')
