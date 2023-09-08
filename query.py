@@ -102,9 +102,9 @@ def main():
 
     # Mode 3: Polygon
     parser_polygon = subparsers.add_parser("polygon", help="query-with-polygon mode help")
-    parser_polygon.add_argument("-p", default=[[0, 0], [50, 0], [0, 50]], help='the set of points of the polygon boundary, e.g. [[0, 0], [50, 0], [0, 50]]')
-    parser_polygon.add_argument("-hole", default='null', help='the vertices of holes in the polygon'
-    parser_polygon.add_argument("-t", default=12, help='tail length of the sfc key, e.g. 12')
+    parser_polygon.add_argument("-p", default=[[0, 0], [50, 0], [0, 50]], help='the set of points of the polygon boundary')
+    parser_polygon.add_argument("-hole", default='null', help='the vertices of holes in the polygon')
+    parser_polygon.add_argument("-t", default=12, help='tail length of the sfc key')
     parser_polygon.add_argument("-user", default='cynthia', help='database username')
     parser_polygon.add_argument("-key", default='123456', help='database password')
     parser_polygon.add_argument("-host", default='localhost', help='database host')
