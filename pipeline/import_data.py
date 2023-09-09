@@ -13,11 +13,13 @@ from pcsfc.encoder import EncodeMorton2D, compute_split_length, split_bin, make_
 
 class PointGroupProcessor:
     def __init__(self, meta_id, path, file, ratio):
-        points_per_iter = 50000000
         self.input = path + '/' + file
 
         self.metas = self.get_metadata(meta_id, file, ratio)
-        self.pc_groups = self.process_points(self.metas['tail_length'], points_per_iter)
+        if self.metas['number_of_points'] <= 50000000:
+            self.pc_groups = self.process_points(self.metas['tail_length'])
+        else:
+            self.pc_groups = self.process_points_chunk(self.metas['tail_length'])
 
     def get_metadata(self, meta_id, file, ratio):
         with laspy.open(self.input) as f:
@@ -39,29 +41,33 @@ class PointGroupProcessor:
         print('Metadata: ', meta_dict)
         return meta_dict
 
-    def process_points(self, tail_len, points_per_iter):
-        # Read and encode the data
+    def process_points(self, tail_len):
+        las = laspy.read(self.input)
+        points = np.vstack((las.x, las.y, las.z, las.classification)).transpose()
+        encoded_pts = []
+        for pt in tqdm(points):
+            mkey = EncodeMorton2D(int(pt[0]), int(pt[1]))
+            head, tail = split_bin(mkey, tail_len)
+            encoded_pts.append([head, tail, float(pt[2]), int(pt[3])])
+        
+        pc_groups = make_groups(encoded_pts)
+        print(len(pc_groups))
+        return pc_groups
+            
+    def process_points_chunk(self, tail_len):
+        encoded_pts = []
         with laspy.open(self.input) as f:
-            split_keys = []
-            if f.header.point_count < points_per_iter:
-                las = laspy.read(self.input)
-                for i in range(f.header.point_count):
-                    mkey = EncodeMorton2D(int(las.x[i]), int(las.y[i]))
+            for points in f.chunk_iterator(50000000):
+                encoded_pts_per_iter = []
+                pts = np.vstack((points.x, points.y, points.z, points.classification)).transpose()
+                print('chunk interator is processing.')
+                for pt in tqdm(range(len(pts))):
+                    mkey = EncodeMorton2D(int(pt[0]), int(pt[1]))
                     head, tail = split_bin(mkey, tail_len)
-                    split_keys.append([head, tail, float(las.z[i]), int(las.classification[i])])
-            else:
-                for pts in f.chunk_iterator(points_per_iter):
-                    split_keys_per_iter = []
-                    i = 0
-                    for i in range(len(pts)):
-                        i = i+1
-                        mkey = EncodeMorton2D(int(pts.x[i]), int(pts.y[i]))
-                        head, tail = split_bin(mkey, tail_len)
-                        split_keys_per_iter.append([head, tail, float(pts.z[i]), int(pts.classification[i])])
-                        print(i)
-                    split_keys = split_keys + split_keys_per_iter
+                    encoded_pts_per_iter.append([head, tail, float(pt[2]), int(pt[3])])
+                encoded_pts = encoded_pts + encoded_pts_per_iter
 
-        pc_groups = make_groups(split_keys)
+        pc_groups = make_groups(encoded_pts)
         print(len(pc_groups))
 
         return pc_groups
