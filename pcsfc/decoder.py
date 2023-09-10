@@ -1,5 +1,7 @@
 import numpy as np
+from numba import jit, int32, int64
 
+@jit(int32(int64))
 def Compact2D(m):
     """
     Decodes the 64 bit morton code into a 32 bit number in the 2D space using
@@ -48,6 +50,7 @@ def DecodeMorton2D(mortonCode):
     return Compact2D(mortonCode), Compact2D(mortonCode >> 1)
 
 
+@jit(int32(int64))
 def DecodeMorton2DX(mortonCode):
     """
     Calculates the x coordinate from a 64 bit morton code
@@ -62,6 +65,7 @@ def DecodeMorton2DX(mortonCode):
     return Compact2D(mortonCode)
 
 
+@jit(int32(int64))
 def DecodeMorton2DY(mortonCode):
     """
     Calculates the y coordinate from a 64 bit morton code

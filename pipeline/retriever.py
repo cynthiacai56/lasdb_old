@@ -3,11 +3,11 @@ from sqlalchemy import create_engine, DDL
 #from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from db import PgDatabase
+
 from pcsfc.decoder import DecodeMorton2D
 from pcsfc.range_search import morton_range
 from pcsfc.geometry_query import bbox_filter, circle_filter, polygon_filter
-from model.storage import Meta, PointRecord
-from model.temp import TempRange#, TempOverlap, TempPoint
 
 
 class GeometryFilter:
@@ -133,4 +133,3 @@ class GeometryFilter:
         session.close()
 
         return query_pts
-

@@ -56,20 +56,21 @@ def test():
     start_time = time.time()
 
     tail_len = 12
-    db_url = 'postgresql://postgres:050694@localhost:5432/lasdb_500m_70'
+    db_url = 'postgresql://postgres:050694@localhost:5432/lasdb_500_70'
     head_len = 26
 
-    '''
-    spatial_extent = [80000,80500,443750,444250]
-    constr_bbox = [80010, 80310, 443760, 443960]
-    geofilter = GeometryFilter(GeometryFilter.MODE_BBOX, constr_bbox, head_len, tail_len, db_url)
 
-    constr_circle = [[80250, 444000], 150]
-    geofilter = GeometryFilter(GeometryFilter.MODE_CIRCLE, constr_circle, head_len, tail_len, db_url)
-    '''
+    #spatial_extent = [80000,80500,443750,444250]
+    #constr_bbox = [80010, 80310, 443760, 443960]
+    #geofilter = GeometryFilter(GeometryFilter.MODE_BBOX, constr_bbox, head_len, tail_len, db_url)
+
+    #constr_circle = [[80250, 444000], 150]
+    #geofilter = GeometryFilter(GeometryFilter.MODE_CIRCLE, constr_circle, head_len, tail_len, db_url)
 
     constr_polygon = [[80100, 444000], [80250, 444500], [80300, 444000], [80250, 44350]]
     geofilter = GeometryFilter(GeometryFilter.MODE_POLYGON, constr_polygon, head_len, tail_len, db_url)
+
+
     results = geofilter.query()
     print(len(results))
 
@@ -141,4 +142,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()
