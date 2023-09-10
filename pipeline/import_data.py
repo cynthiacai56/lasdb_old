@@ -97,7 +97,7 @@ class PointGroupProcessor:
         db = PgDatabase(dbname, user, password, host, port)
         db.connect()
 
-        insert_meta_sql = "INSERT INTO pc_metadata_20m VALUES (%s, %s, %s,%s, %s, %s, %s, %s, %s);"
+        insert_meta_sql = "INSERT INTO pc_metadata_210m VALUES (%s, %s, %s,%s, %s, %s, %s, %s, %s);"
         db.create_table()
         db.execute_query(insert_meta_sql, self.meta)
         db.execute_copy("pc_record.csv")
