@@ -84,7 +84,7 @@ class PointGroupProcessor:
         return encoded_pts
 
     def write_csv(self, encoded_pts):
-        pc_groups = make_groups(encoded_pts)
+        pc_groups = make_groups(encoded_pts, columns=['sfc_head','sfc_tail','z'])
         print("The number of groups:", len(pc_groups))
 
         df = pd.DataFrame(pc_groups)
