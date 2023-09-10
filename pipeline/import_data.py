@@ -29,7 +29,7 @@ def multi_importer(args):
     for i in range(interation):
         f = files[i]
         importer = PointGroupProcessor(i, p, f, r)
-        importer.connect_db(importer.meta, dbname, user, password)
+        importer.connect_db(dbname, user, password)
 
 
 def single_importer(args):
@@ -39,7 +39,7 @@ def single_importer(args):
 
     # Load metadata; Read, encode and group the points
     importer = PointGroupProcessor(1, path, file, ratio)
-    importer.connect_db(importer.meta, dbname, user, password)
+    importer.connect_db(dbname, user, password)
 
 
 class PointGroupProcessor:
