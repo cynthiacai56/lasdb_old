@@ -51,6 +51,8 @@ def EncodeMorton2D(x, y):
 
 def process_point(point, tail_len):
     mkey = EncodeMorton2D(int(point[0]), int(point[1]))
+    print(mkey, bin(mkey))
+    print(tail_len)
     head = mkey >> tail_len
     tail = mkey - (head << tail_len)
     encoded_point = [head, tail, float(point[2])]
