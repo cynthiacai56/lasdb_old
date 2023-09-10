@@ -84,13 +84,13 @@ class PointGroupProcessor:
         return encoded_pts
 
     def write_csv(self, encoded_pts):
-        pc_groups = make_groups(encoded_pts, columns=['sfc_head','sfc_tail','z'])
+        pc_groups = make_groups(encoded_pts)
         print("The number of groups:", len(pc_groups))
 
-        df = pd.DataFrame(pc_groups)
-        df.insert(0, 'meta_id', 1)
+        df = pd.DataFrame(pc_groups, columns=['sfc_head','sfc_tail','z'])
         df['sfc_tail'] = df['sfc_tail'].apply(lambda x: str(x).replace('[', '{').replace(']', '}'))
         df['z'] = df['z'].apply(lambda x: str(x).replace('[', '{').replace(']', '}'))
+        df.insert(0, 'meta_id', 1)
         df.to_csv("pc_record.csv", index=False, mode='w')
 
     def connect_db(self, dbname, user, password, host="localhost", port=5432):
