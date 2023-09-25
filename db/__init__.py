@@ -38,7 +38,7 @@ class PgDatabase:
             return
 
         create_table_sql = """
-            CREATE TABLE IF NOT EXISTS pc_metadata_210m_60 (
+            CREATE TABLE IF NOT EXISTS pc_metadata_2201m_70 (
                 id SERIAL PRIMARY KEY,
                 version DOUBLE PRECISION,
                 source_file TEXT,
