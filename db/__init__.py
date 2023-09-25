@@ -38,7 +38,7 @@ class PgDatabase:
             return
 
         create_table_sql = """
-            CREATE TABLE IF NOT EXISTS pc_metadata_2201m_70 (
+            CREATE TABLE IF NOT EXISTS pc_metadata_2201m (
                 id SERIAL PRIMARY KEY,
                 version DOUBLE PRECISION,
                 source_file TEXT,
@@ -49,7 +49,7 @@ class PgDatabase:
                 offsets DOUBLE PRECISION[],
                 bbox DOUBLE PRECISION[]
             );
-            CREATE TABLE IF NOT EXISTS pc_record_210m_60 (
+            CREATE TABLE IF NOT EXISTS pc_record_2201m (
                 meta_id INT,
                 sfc_head INT,
                 sfc_tail INT[],
@@ -94,7 +94,7 @@ class PgDatabase:
         # Use the COPY command to insert point records into the table
         with open(filename, 'r') as f:
             try:
-                self.cursor.copy_expert(sql="COPY pc_record_210m_60 FROM stdin WITH CSV HEADER", file=f)
+                self.cursor.copy_expert(sql="COPY pc_record_2201m FROM stdin WITH CSV HEADER", file=f)
                 self.connection.commit()
                 print("Data copied successfully.")
             except Error as e:
