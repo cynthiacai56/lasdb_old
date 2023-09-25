@@ -1,6 +1,5 @@
 import argparse
 import time
-import csv
 from pipeline.import_data import single_importer, multi_importer
 from pipeline.import_data import PointGroupProcessor
 
@@ -37,12 +36,14 @@ def main():
         args.func(args)
         run_time = time.time() - start_time
         print("The total running time:", run_time)
+        '''
         runtime_formatted = time.strftime("%H:%M:%S", time.gmtime(runtime_seconds))
         csv_filename = args.f + "runtime_log.csv"
         with open(csv_filename, mode="w", newline="") as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([args.f])
             csv_writer.writerow([runtime_formatted])
+        '''
     else:
         parser.print_help()
 
