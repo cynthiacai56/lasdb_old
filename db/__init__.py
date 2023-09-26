@@ -70,6 +70,16 @@ class PgDatabase:
             print(e)
             self.connection.rollback()
 
+    def check_exist(self, file):
+        table_name = 'pc_metadata_2201m'
+        query = f"SELECT 1 FROM {table_name} WHERE source_file = %s;"
+        self.cursor.execute(query, (file,))
+        result = self.cursor.fetchone()
+        if result is not None:
+            return 0
+        else:
+            return 1
+            
     def execute_query(self, sql, data=None):
         if not self.connection:
             print("Error: Database connection is not established.")
