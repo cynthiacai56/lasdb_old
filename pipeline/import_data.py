@@ -65,7 +65,7 @@ class PointGroupProcessor:
         else:
             encoded_pts = self.process_points_chunk(self.meta[5])
 
-        self.write_csv(encoded_pts)
+        self.write_csv(encoded_pts, meta_id)
 
     def get_metadata(self, meta_id, file, ratio):
         with laspy.open(self.input) as f:
@@ -102,7 +102,7 @@ class PointGroupProcessor:
         df = pd.DataFrame(pc_groups, columns=['sfc_head','sfc_tail','z'])
         df['sfc_tail'] = df['sfc_tail'].apply(lambda x: str(x).replace('[', '{').replace(']', '}'))
         df['z'] = df['z'].apply(lambda x: str(x).replace('[', '{').replace(']', '}'))
-        df.insert(0, 'meta_id', 1)
+        df.insert(0, 'meta_id', meta_id)
         df.to_csv("pc_record.csv", index=False, mode='w')
 
     def connect_db(self, dbname, user, password, host="localhost", port=5432):
