@@ -33,6 +33,7 @@ def multi_importer(args):
     interation = min(len(files), n)
     for i in range(interation):
         f = files[i]
+        print(i, f)
         importer = PointGroupProcessor(i, p, f, r)
         importer.connect_db(dbname, user, password)
 
