@@ -25,6 +25,11 @@ def multi_importer(args):
     files = get_file_names(p)
     dbname, user, password = args.db, args.user, args.key
 
+    db = PgDatabase(dbname, user, password, host, port)
+    db.connect()
+    db.create_table()
+    db.disconnect()
+    
     interation = min(len(files), n)
     for i in range(interation):
         f = files[i]
@@ -39,6 +44,10 @@ def single_importer(args):
 
     # Load metadata; Read, encode and group the points
     importer = PointGroupProcessor(1, path, file, ratio)
+    db = PgDatabase(dbname, user, password, host, port)
+    db.connect()
+    db.create_table()
+    db.disconnect()
     importer.connect_db(dbname, user, password)
 
 
@@ -98,7 +107,7 @@ class PointGroupProcessor:
         db.connect()
 
         insert_meta_sql = "INSERT INTO pc_metadata_2201m VALUES (%s, %s, %s,%s, %s, %s, %s, %s, %s);"
-        db.create_table()
+        #db.create_table()
         db.execute_query(insert_meta_sql, self.meta)
         db.execute_copy("pc_record.csv")
 
