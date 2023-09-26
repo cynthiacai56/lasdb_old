@@ -26,16 +26,17 @@ def multi_importer(args):
     dbname, user, password = args.db, args.user, args.key
     host, port = 'localhost', 5432
 
-    db = PgDatabase(dbname, user, password, host, port)
-    db.connect()
-    db.create_table()
-    db.disconnect()
+    #db = PgDatabase(dbname, user, password, host, port)
+    #db.connect()
+    #db.create_table()
+    #db.disconnect()
     
-    interation = min(len(files), n)
-    for i in range(interation):
+    #interation = min(len(files), n)
+    intertaion = 133
+    for i in range(0, interation):
         f = files[i]
-        print(i, f)
-        importer = PointGroupProcessor(i, p, f, r)
+        print(i+20, f)
+        importer = PointGroupProcessor(i+20, p, f, r)
         importer.connect_db(dbname, user, password)
 
 
