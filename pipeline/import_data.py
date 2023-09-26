@@ -24,6 +24,7 @@ def multi_importer(args):
     p, r, n = args.p, args.r, args.n
     files = get_file_names(p)
     dbname, user, password = args.db, args.user, args.key
+    host = 'localhost'
 
     db = PgDatabase(dbname, user, password, host, port)
     db.connect()
