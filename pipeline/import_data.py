@@ -43,6 +43,7 @@ def single_importer(args):
     # Load parameters
     path, file, ratio = args.p, args.f, args.r
     dbname, user, password = args.db, args.user, args.key
+    host = 'localhost'
 
     # Load metadata; Read, encode and group the points
     importer = PointGroupProcessor(1, path, file, ratio)
