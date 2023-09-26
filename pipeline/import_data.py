@@ -32,7 +32,7 @@ def multi_importer(args):
     #db.disconnect()
     
     #interation = min(len(files), n)
-    intertaion = 133
+    interation = 133
     for i in range(0, interation):
         f = files[i]
         print(i+20, f)
