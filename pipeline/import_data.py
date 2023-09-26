@@ -24,7 +24,7 @@ def multi_importer(args):
     p, r, n = args.p, args.r, args.n
     files = get_file_names(p)
     dbname, user, password = args.db, args.user, args.key
-    host = 'localhost'
+    host, port = 'localhost', 5432
 
     db = PgDatabase(dbname, user, password, host, port)
     db.connect()
@@ -43,7 +43,7 @@ def single_importer(args):
     # Load parameters
     path, file, ratio = args.p, args.f, args.r
     dbname, user, password = args.db, args.user, args.key
-    host = 'localhost'
+    host, port = 'localhost', 5432
 
     # Load metadata; Read, encode and group the points
     importer = PointGroupProcessor(1, path, file, ratio)
