@@ -95,7 +95,7 @@ class PointGroupProcessor:
 
         return encoded_pts
 
-    def write_csv(self, encoded_pts):
+    def write_csv(self, encoded_pts, meta_id):
         pc_groups = make_groups(encoded_pts)
         print("The number of groups:", len(pc_groups))
 
